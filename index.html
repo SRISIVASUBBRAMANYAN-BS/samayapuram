@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>சமயபுரம் மாரியம்மன் பூச்சாரித்தல் 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8B0000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #8B0000;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .amman-loading-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(139, 0, 0, 0.3);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+        }
+
+        .header-text h1 {
+            font-size: 18px;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .header-text p {
+            font-size: 12px;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        .date-time {
+            font-size: 12px;
+            margin-top: 8px;
+            opacity: 0.85;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            width: 100%;
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Dashboard Screen */
+        .dashboard {
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .dashboard-title {
+            color: #8B0000;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .dashboard-buttons {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 140px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #8B0000;
+            border: 2px solid #8B0000;
+        }
+
+        .btn-secondary:hover {
+            background: #8B0000;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #DC3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Camera Screen */
+        .camera-container {
+            width: 100%;
+            position: relative;
+        }
+
+        #canvas {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .scanner-overlay {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .scan-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px dashed #8B0000;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scan-text {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .success-tick {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 500;
+            animation: scaleUp 0.4s ease;
+        }
+
+        @keyframes scaleUp {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .tick-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(76, 175, 80, 0.4);
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .tick-icon {
+            width: 60px;
+            height: 60px;
+            border: 4px solid white;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .tick-icon::before {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Count Input */
+        .count-input-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .count-label {
+            color: #8B0000;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .count-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .count-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .count-input-group input:focus {
+            outline: none;
+            border-color: #8B0000;
+        }
+
+        .count-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .count-btn-group button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .count-btn-group .btn-confirm {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .count-btn-group .btn-confirm:hover {
+            background: #45a049;
+        }
+
+        .count-btn-group .btn-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .count-btn-group .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        /* Logs Screen */
+        .logs-container {
+            width: 100%;
+        }
+
+        .logs-header {
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logs-header h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .logs-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .logs-summary {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            color: #8B0000;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logs-table thead {
+            background: #8B0000;
+            color: white;
+        }
+
+        .logs-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .logs-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        .logs-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .logs-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .export-buttons button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* Back Button */
+        .back-btn {
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* Footer */
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 11px;
+            border-top: 1px solid #555;
+        }
+
+        .footer p {
+            margin: 3px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0;
+                max-width: 100%;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header-text h1 {
+                font-size: 16px;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .dashboard-title {
+                font-size: 20px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+                min-width: 120px;
+            }
+        }
+
+        /* Barcode styles */
+        .barcode-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .barcode-id {
+            color: #8B0000;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <img src="1.jpeg" alt="Amman" class="amman-loading-img">
+        <div class="loader-spinner"></div>
+        <p class="loading-text">அருள்மிகு சமயபுரம் மாரியம்மன் பூச்சொரிதல் விழா</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="1.jpeg" alt="Logo" class="logo">
+            <div class="header-text">
+                <h1>அருள்மிகு சமயபுரம் மாரியம்மன் பூச்சொரிதல் விழா 2026</h1>
+                <p>Thiruvizha 2026</p>
+                <div class="date-time" id="dateTime"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Screen -->
+            <div class="screen active" id="dashboardScreen">
+                <div class="dashboard">
+                    <p class="dashboard-title">பூச்சொரிதல் விழா</p>
+                    <div class="dashboard-buttons">
+                        <button class="btn btn-primary" onclick="goToScan()">
+                            <span>📱</span> ஸ்கேன் செய்யவும்
+                        </button>
+                        <button class="btn btn-secondary" onclick="goToLogs()">
+                            <span>📊</span> பதிவுகள்
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Camera Screen -->
+            <div class="screen" id="cameraScreen">
+                <button class="back-btn" onclick="goToDashboard()">← பின்னோக்கு</button>
+                <div class="scanner-overlay">
+                    <video id="video" playsinline></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
+                    <div class="scan-guide">
+                        <div class="scan-text">பார்கோடை சுட்டத்தகத்திற்குள் வைக்கவும்</div>
+                    </div>
+                </div>
+                <p style="text-align: center; color: #666; margin-top: 20px; font-size: 14px;">ஸ்கேனிங் நடந்து கொண்டிருக்கிறது...</p>
+            </div>
+
+            <!-- Logs Screen -->
+            <div class="screen" id="logsScreen">
+                <button class="back-btn" onclick="goToDashboard()">← பின்னோக்கு</button>
+                <div class="logs-container">
+                    <div class="logs-header">
+                        <h2>ஸ்கேன் பதிவுகள்</h2>
+                        <p id="logsDate"></p>
+                    </div>
+                    <div class="logs-summary">
+                        <div class="summary-item">
+                            <div class="summary-label">மொத்த ஸ்கேன்</div>
+                            <div class="summary-value" id="totalScans">0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">மொத்த நபர்கள்</div>
+                            <div class="summary-value" id="totalPeople">0</div>
+                        </div>
+                    </div>
+                    <div id="logsTableContainer">
+                        <table class="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>வ.எண்</th>
+                                    <th>பார்கோடு ID</th>
+                                    <th>நபர்கள்</th>
+                                    <th>நேரம்</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="logsEmpty" class="logs-empty" style="display:none;">
+                        <p>இன்னும் ஸ்கேன் பதிவுகள் இல்லை</p>
+                    </div>
+                    <div class="export-buttons" id="exportButtons" style="display:none;">
+                        <button class="btn btn-primary" onclick="downloadPDF()">📄 PDF இருக்கு</button>
+                        <button class="btn btn-secondary" onclick="downloadExcel()">📊 Excel இருக்கு</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2026 Deccaanow Corp. All Rights Reserved.</p>
+            <p>Created with ❤️ for Samyapuram Mariamman Thiruvizha</p>
+        </div>
+    </div>
+
+    <script>
+        // Data Management
+        const DATA_KEY = 'samyapuram_scan_logs';
+        let scanData = [];
+        let currentVideo = null;
+        let currentCodeReader = null;
+
+        // Initialize
+        function init() {
+            loadData();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // Hide loading screen after 5 seconds
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 5000);
+        }
+
+        // Date & Time Management
+        function updateDateTime() {
+            const now = new Date();
+            const tamildayNames = ['ஞாயிறு', 'திங்கள்', 'செவ்வாய்', 'புதன்', 'வியாழன்', 'வெள்ளி', 'சனி'];
+            const tamilMonths = ['ஜனவரி', 'பிப்ரவரி', 'மார்ச்', 'ஏப்ரல்', 'மே', 'ஜூன்', 'ஜூலை', 'ஆகஸ்ட்', 'செப்டம்பர்', 'அக்டோபர்', 'நவம்பர்', 'டிசம்பர்'];
+            
+            const dayName = tamildayNames[now.getDay()];
+            const date = now.getDate();
+            const month = tamilMonths[now.getMonth()];
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('dateTime').textContent = `${dayName} ${date} ${month} ${year} | ${hours}:${minutes}:${seconds}`;
+            document.getElementById('logsDate').textContent = `${dayName}, ${date} ${month} ${year}`;
+        }
+
+        // Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToDashboard() {
+            stopScanning();
+            showScreen('dashboardScreen');
+        }
+
+        function goToScan() {
+            showScreen('cameraScreen');
+            startScanning();
+        }
+
+        function goToLogs() {
+            stopScanning();
+            showScreen('logsScreen');
+            displayLogs();
+        }
+
+        // Barcode Scanning
+        async function startScanning() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                
+                video.srcObject = stream;
+                currentVideo = stream;
+
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    scanBarcode(video, canvas, ctx);
+                };
+            } catch (err) {
+                alert('कैमरे को एक्सेस करने में विफल। कृपया अनुमति दें।');
+            }
+        }
+
+        function stopScanning() {
+            if (currentVideo) {
+                currentVideo.getTracks().forEach(track => track.stop());
+                currentVideo = null;
+            }
+        }
+
+        function scanBarcode(video, canvas, ctx) {
+            const scanInterval = setInterval(() => {
+                if (!document.getElementById('cameraScreen').classList.contains('active')) {
+                    clearInterval(scanInterval);
+                    return;
+                }
+
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                if (code) {
+                    clearInterval(scanInterval);
+                    handleBarcodeDetected(code.data);
+                }
+            }, 100);
+        }
+
+        function handleBarcodeDetected(barcode) {
+            stopScanning();
+            showSuccessTick(barcode);
+        }
+
+        function showSuccessTick(barcode) {
+            const tickHTML = `
+                <div class="success-tick">
+                    <div class="tick-circle">
+                        <div class="tick-icon"></div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', tickHTML);
+
+            setTimeout(() => {
+                document.querySelector('.success-tick').remove();
+                showCountInput(barcode);
+            }, 1500);
+        }
+
+        function showCountInput(barcode) {
+            const countHTML = `
+                <div class="count-input-container">
+                    <label class="count-label">நபர்களின் எண்ணிக்கை உள்ளிடவும்</label>
+                    <div class="barcode-id">பார்கோடு: ${barcode}</div>
+                    <div class="count-input-group">
+                        <input type="number" id="countInput" min="1" value="1" placeholder="நபர்கள்" autofocus>
+                    </div>
+                    <div class="count-btn-group">
+                        <button class="count-btn-group" onclick="confirmCount('${barcode}')">
+                            <button class="count-btn-group btn-confirm">உறுதிப்படுத்தவும்</button>
+                        </button>
+                        <button class="count-btn-group btn-cancel" onclick="cancelCount()">ரத்து செய்யவும்</button>
+                    </div>
+                </div>
+            `;
+            
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = countHTML;
+            document.getElementById('countInput').focus();
+        }
+
+        function confirmCount(barcode) {
+            const count = parseInt(document.getElementById('countInput').value) || 1;
+            const now = new Date();
+            const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            const record = {
+                id: barcode,
+                count: count,
+                time: time,
+                date: now.toDateString()
+            };
+
+            scanData.push(record);
+            saveData();
+
+            // Show confirmation and restart camera
+            showScreen('cameraScreen');
+            setTimeout(() => {
+                startScanning();
+            }, 500);
+        }
+
+        function cancelCount() {
+            showScreen('cameraScreen');
+            setTimeout(() => {
+                startScanning();
+            }, 500);
+        }
+
+        // Data Persistence
+        function saveData() {
+            localStorage.setItem(DATA_KEY, JSON.stringify(scanData));
+        }
+
+        function loadData() {
+            const data = localStorage.getItem(DATA_KEY);
+            scanData = data ? JSON.parse(data) : [];
+        }
+
+        function displayLogs() {
+            if (scanData.length === 0) {
+                document.getElementById('logsTableContainer').style.display = 'none';
+                document.getElementById('logsEmpty').style.display = 'block';
+                document.getElementById('exportButtons').style.display = 'none';
+                document.getElementById('totalScans').textContent = '0';
+                document.getElementById('totalPeople').textContent = '0';
+                return;
+            }
+
+            document.getElementById('logsTableContainer').style.display = 'block';
+            document.getElementById('logsEmpty').style.display = 'none';
+            document.getElementById('exportButtons').style.display = 'flex';
+
+            const tbody = document.getElementById('logsTableBody');
+            tbody.innerHTML = '';
+
+            let totalPeople = 0;
+            scanData.forEach((record, index) => {
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${record.id}</td>
+                        <td>${record.count}</td>
+                        <td>${record.time}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+                totalPeople += record.count;
+            });
+
+            document.getElementById('totalScans').textContent = scanData.length;
+            document.getElementById('totalPeople').textContent = totalPeople;
+        }
+
+        // Export Functions
+        function downloadPDF() {
+            const element = document.querySelector('.logs-container');
+            const opt = {
+                margin: 10,
+                filename: 'samyapuram_scan_logs.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function downloadExcel() {
+            const ws_data = [['வ.எண்', 'பார்கோடு ID', 'நபர்கள்', 'நேரம்', 'தேதி']];
+            
+            scanData.forEach((record, index) => {
+                ws_data.push([index + 1, record.id, record.count, record.time, record.date]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Scan Logs');
+            XLSX.writeFile(wb, 'samyapuram_scan_logs.xlsx');
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
